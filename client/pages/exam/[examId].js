@@ -122,7 +122,6 @@ const ExamShow = ({exams,part1,currentUser})=>{
                    {part1.question[value].imageUrl && ( 
                    <div>
                        <img src={part1.question[value].imageUrl} alt={part1.question[value].imageUrl} style={{width:350,height:350}} />
-                    <button className="btn btn-danger" onClick={()=>Router.push(`/admin/image/deleteImage/[imageId]`,`/admin/image/deleteImage/${part}`)}>Delete</button>
                    </div>
                    )}
                    {currentUser && currentUser.role ===1  &&(<div>
@@ -169,15 +168,15 @@ const ExamShow = ({exams,part1,currentUser})=>{
                    )}
 
               </form>
-
+              <div style={{display:`${showdiv}`}}>
+               {part1.question[value].giaithich&& (<p>gai tich: {giaithich}</p>)}
+                {part1.question[value].dich&&(<p>dich:{dich}</p>)}
+              </div>
               {currentUser && currentUser.role ===1 &&(<div>
                         <Audio  questionId={part1.question[value].id} examId={exams.id} />
                    </div>)}
              
-            <div style={{display:`${showdiv}`}}>
-               {part1.question[value].giaithich&& (<p>gai tich: {giaithich}</p>)}
-                {part1.question[value].dich&&(<p>dich:{dich}</p>)}
-              </div>
+          
               <button className='btn btn-primary' onClick={()=>{newa(value)}}style={{display:`${next}`}}>next</button>
                {errors}
               <div>
