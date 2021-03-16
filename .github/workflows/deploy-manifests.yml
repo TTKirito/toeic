@@ -15,6 +15,6 @@ jobs:
         with:
           service_acount_key: ${{secrets.GCP_KEY}}
           export_default_credentials: true
-      - run: gcloud auth configure docker
+      - run: gcloud auth configure-docker
       - run: gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project stoked-champion-306202
       - run: kubectl apply -f infra/k8s && kubectl apply -f infra/k8s-prod
