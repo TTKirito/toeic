@@ -13,7 +13,6 @@ const start = async () => {
     if(!process.env.NATS_CLUSTER_ID){
         throw new Error('NATS_CLIENT_ID must be defined')
     }
-    console.log('adf')
 
     try {
         await natsWrapper.connect(
