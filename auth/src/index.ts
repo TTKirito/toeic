@@ -31,6 +31,7 @@ const start = async () => {
             process.exit();
           });
           process.on('SIGINT', () => natsWrapper.client.close());
+          console.log('adf')
           process.on('SIGTERM', () => natsWrapper.client.close());
           
           new UserUpdatedListener(natsWrapper.client).listen()
