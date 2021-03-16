@@ -13,9 +13,9 @@ jobs:
       - uses: actions/checkout@v2
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
-          service_acount_key: ${{secrets.GCP_KEY}}
+          service_account_key: ${{secrets.GCP_KEY}}
           export_default_credentials: true
-      - run: gcloud auth configure docker
+      - run: gcloud auth configure-docker
       - run: cd client && docker build -t us.gcr.io/${{secrets.GCP_PROJECT_ID}}/client .
       - run: docker push us.gcr.io/${{secrets.GCP_PROJECT_ID}}/client
       - run: gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project stoked-champion-306202
