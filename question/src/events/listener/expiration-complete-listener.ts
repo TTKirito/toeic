@@ -1,6 +1,7 @@
 import { NotFoundError,ExamStatus, Listener,ExpirationCompleteEvent, Subject} from '@toeic/common'
 import { Message} from 'node-nats-streaming'
 import { Exam } from '../../models/exam'
+import { Part1 } from '../../models/part1'
 import {QueueGroupName} from './queue-group-name'
 
 export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent>{
@@ -20,8 +21,18 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
         exam.set({
             status: ExamStatus.Complete
         })
-
+        
         await exam.save()
+
+        const part1 = await Part1.findById(exam.part1.id)
+        if(!part1){
+            throw new NotFoundError()
+        }
+
+        part1.set({
+            examId: undefined
+        })
+        await part1.save()
         msg.ack()
     }
 }

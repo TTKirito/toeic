@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import useRequest from '../../hooks/use-request'
 import Router from 'next/router'
-const currentuser = ({currentUser,pays}) => {
+const currentuser = ({currentUser,pays,submit,users}) => {
     const [money,setMoney] = useState(0)
     const { doRequest, errors } = useRequest({
         url: '/api/users/pay',
@@ -45,7 +45,27 @@ const currentuser = ({currentUser,pays}) => {
                     ))
                 }
             </ul>
+            <h3>Exam history:</h3>
+            <ul>
+                {submit.map(submit =>(
+                    <li key={submit.id}>Correct: {submit.correct} - inCorrect: {submit.incorrect} - noAnswer: {submit.noanswer}</li>
+                ))}
+            </ul>
 
+            {currentUser && currentUser.role===1 &&(
+                <div>
+                    <h3>All User:</h3>
+                <ul>
+                    {users.map(user=>(
+                        <li key={user.id}>Email:{user.email} - Password:{user.password} - Role:{user.role} - Money{user.money} &nbsp; 
+                            <button className="btn btn-primary" onClick={()=> Router.push('/admin/user/updateUser/[userId]',`/admin/user/updateUser/${user.id}`)}>Update</button>
+                        &nbsp;
+                        <button className="btn btn-danger" onClick={()=> Router.push('/admin/user/deleteUser/[userId]',`/admin/user/deleteUser/${user.id}`)}>Delete</button>
+                        </li>
+                    ))}
+                </ul>
+                </div>
+            )}
         </div>
 
         
@@ -53,8 +73,10 @@ const currentuser = ({currentUser,pays}) => {
 }
 currentuser.getInitialProps = async (context,client) =>{
     const { data:pays } = await client.get('/api/users/pay')
-   
-    return { pays}
+   const {data: submit} = await client.get('/api/submit')
+   const {data: users} = await client.get('/api/users/allUser')
+
+    return { pays,submit, users}
 }
 
 

@@ -48,13 +48,40 @@ router.get('/api/audio', async (req: Request, res: Response) =>{
 })
 router.get('/api/audio/:id', async (req: Request, res: Response) =>{
     const audio = await Audio.findById(req.params.id).populate('question')
+    
+    if(!audio){
+        throw new NotFoundError()
+    }
+    
+    
     res.set('Content-Type','audio/mpeg')
+    
+    
+    
     res.send(audio?.audio)
 })
 
 router.delete('/api/audio/:id',requireAuth,isAdmin, async (req: Request, res: Response) =>{
-    const audio = await Audio.findByIdAndDelete(req.params.id).populate('question')
+    const audio = await Audio.findById(req.params.id).populate('question')
+   
+   if(!audio){
+       throw new NotFoundError()
+   }
+
+   const question = await Question.findById(audio.question.id)
+
+   if(!question){
+       throw new NotFoundError()
+   }
+
+   question.set({
+       audioUrl: undefined
+   })
+
+   await question.save()
+   
     res.set('Content-Type','audio/mpeg')
+    await audio?.remove()
     res.send(audio?.audio)
 })
 

@@ -15,7 +15,7 @@ paypal.configure({
   });
 router.post('/api/users/pay',currentUser,[
     body('amout')
-        .isFloat({gt:-1})
+        .isFloat({gt: 0})
         .withMessage('amout is required'),
 ],validateRequest,(req: Request, res: Response) =>{
 

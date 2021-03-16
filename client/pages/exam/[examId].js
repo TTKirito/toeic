@@ -2,6 +2,8 @@ import {useState, useEffect} from 'react'
 import Router from 'next/router'
 import useRequest from '../../hooks/use-request'
 import axios from 'axios'
+import Image from '../admin/image/[image]'
+import Audio from '../admin/image/audio'
 
 const ExamShow = ({exams,part1,currentUser})=>{
     const [timeLeft, setTimeLeft] = useState(0)
@@ -31,6 +33,7 @@ const ExamShow = ({exams,part1,currentUser})=>{
         return (
             <div>
                 <h1>No question</h1>
+                {currentUser && currentUser.role === 1 &&(<button onClick={()=>Router.push('/admin/question/[questionId]',`/admin/question/${part1.id}`)} className="btn btn-primary">Add Question</button>)}
             </div>
         )   
     }
@@ -65,15 +68,36 @@ const ExamShow = ({exams,part1,currentUser})=>{
         
         
             async function newa (x){
-                if(checked){
-                    setChecked("")
-                }
+                
         
                   
                     var z=x+1
                     var a=traloi
-                    
-                    if(x < part1.question.length - 1){
+                    if(x === part1.question.length -1){
+                        a.push({dung,skills: part1.question[value].skills, question: part1.question[value].id})
+                        settraloi(a)
+                        const corrects = []
+                        const noanswers = []
+                        const incorrects = []
+                        for(let i=0;i<traloi.length;i++){
+                           if(traloi[i].dung === ''){
+                               noanswers.push(traloi[i])
+                           }else if(traloi[i].dung === 'dung'){
+                               corrects.push(traloi[i])
+                           }else {
+                               incorrects.push(traloi[i])
+                           }
+                        }
+                        await doRequest({
+                         correct:corrects.length,
+                         incorrect:incorrects.length,
+                         noanswer:noanswers.length,
+                         examId: exams.id
+                     }) 
+                    } else if(x < part1.question.length - 1){
+                        if(checked){
+                            setChecked("")
+                        }
                         setvalue(z)
                          setnext('block')
                          setgiaithich('')
@@ -85,31 +109,7 @@ const ExamShow = ({exams,part1,currentUser})=>{
                         a.push({dung,skills: part1.question[value].skills, question: part1.question[value].id})
                         settraloi(a)
                         console.log(traloi)
-        
-                        
-                    }
-                    if(x === part1.question.length -1){
-                       a.push({dung,skills: part1.question[value].skills, question: part1.question[value].id})
-                       settraloi(a)
-                       const corrects = []
-                       const noanswers = []
-                       const incorrects = []
-                       for(let i=0;i<traloi.length;i++){
-                          if(traloi[i].dung === ''){
-                              noanswers.push(traloi[i])
-                          }else if(traloi[i].dung === 'dung'){
-                              corrects.push(traloi[i])
-                          }else {
-                              incorrects.push(traloi[i])
-                          }
-                       }
-        
-                       await doRequest({
-                        correct:corrects.length,
-                        incorrect:incorrects.length,
-                        noanswer:noanswers.length,
-                        examId: exams.id
-                    })
+                    
                       
                        
                     }
@@ -119,10 +119,28 @@ const ExamShow = ({exams,part1,currentUser})=>{
             }
             return(
                 <div>
-                   {part1.question[value].imageUrl && ( <img src={part1.question[value].imageUrl} alt={part1.question[value].imageUrl} style={{width:350,height:350}} />)}
-                   
+                   {part1.question[value].imageUrl && ( 
+                   <div>
+                       <img src={part1.question[value].imageUrl} alt={part1.question[value].imageUrl} style={{width:350,height:350}} />
+                    <button className="btn btn-danger" onClick={()=>Router.push(`/admin/image/deleteImage/[imageId]`,`/admin/image/deleteImage/${part}`)}>Delete</button>
+                   </div>
+                   )}
+                   {currentUser && currentUser.role ===1  &&(<div>
+                        <Image  questionId={part1.question[value].id} examId={exams.id} />
+                   </div>)}
+
                     <div style={{color: 'red'}}>{dung}</div>
-                    <div>{part1.question[value].title}:{part1.question[value].description}</div>
+                    <div>{part1.question[value].title}:{part1.question[value].description}&nbsp;
+                    {currentUser&&currentUser.role===1&&(
+                        <>
+                            &nbsp;
+                             <button className="btn btn-primary" onClick={()=> Router.push(`/admin/question/updateQuestion/[questionId]`, `/admin/question/updateQuestion/${part1.question[value].id}`)}>Update</button>
+                            &nbsp;
+                                <button className="btn btn-danger" onClick={()=> Router.push(`/admin/question/deleteQuestion/[questionId]`, `/admin/question/deleteQuestion/${part1.question[value].id}`)}>Delete</button>
+                        </>
+                    )}
+                     
+                     </div>
                     <form>
                 <label className="container">{part1.question[value].A}
                   <input checked={checked === part1.question[value].A} onClick={(x)=>{setChecked(x.target.value)}} onChange={()=>{dapan(part1.question[value].A)}} value={part1.question[value].A} type="radio" name="radio"/>
@@ -149,15 +167,22 @@ const ExamShow = ({exams,part1,currentUser})=>{
                            />
                        </audio>
                    )}
+
               </form>
+
+              {currentUser && currentUser.role ===1 &&(<div>
+                        <Audio  questionId={part1.question[value].id} examId={exams.id} />
+                   </div>)}
              
             <div style={{display:`${showdiv}`}}>
                {part1.question[value].giaithich&& (<p>gai tich: {giaithich}</p>)}
                 {part1.question[value].dich&&(<p>dich:{dich}</p>)}
               </div>
-              <button className='next' onClick={()=>{newa(value)}}style={{display:`${next}`}}>next</button>
+              <button className='btn btn-primary' onClick={()=>{newa(value)}}style={{display:`${next}`}}>next</button>
                {errors}
-              
+              <div>
+              {currentUser && currentUser.role === 1 && (<button onClick={()=>Router.push('/admin/question/[questionId]',`/admin/question/${part1.id}`)} className="btn btn-primary">Add Question</button>)}
+              </div>
                 </div>
                
             )
@@ -181,7 +206,7 @@ const ExamShow = ({exams,part1,currentUser})=>{
         if(timeLeft < 0 && secondsLeft <0){
             return (
                 <div>
-                    <button onClick={()=>{submit(value)}}style={{display:`${next}`}}>submit</button>
+                    <button className="btn btn-primary" onClick={()=>{submit(value)}}style={{display:`${next}`}}>submit</button>
                     {errors}
                 </div>
             )
@@ -254,56 +279,48 @@ function dapan(x){
 
 
     async function newa (x){
-        if(checked){
-            setChecked("")
-        }
-
-          
-            var z=x+1
-            var a=traloi
-            
-            if(x < part1.question.length - 1){
-                setvalue(z)
-                 setnext('block')
-                 setgiaithich('')
-                 setdich('')
-                 setshowdiv('none')
-                 setdung('')
-                 Router.push(`/exam/${exams.id}`)
-                 
-                a.push({dung,skills: part1.question[value].skills, question: part1.question[value].id})
-                settraloi(a)
-                console.log(traloi)
-
-                
-            }
-            if(x === part1.question.length -1){
-               a.push({dung,skills: part1.question[value].skills, question: part1.question[value].id})
-               settraloi(a)
-               const corrects = []
-               const noanswers = []
-               const incorrects = []
-               for(let i=0;i<traloi.length;i++){
-                  if(traloi[i].dung === ''){
-                      noanswers.push(traloi[i])
-                  }else if(traloi[i].dung === 'dung'){
-                      corrects.push(traloi[i])
-                  }else {
-                      incorrects.push(traloi[i])
-                  }
+         var z=x+1
+        var a=traloi
+        if(x === part1.question.length -1){
+            a.push({dung,skills: part1.question[value].skills, question: part1.question[value].id})
+            settraloi(a)
+            const corrects = []
+            const noanswers = []
+            const incorrects = []
+            for(let i=0;i<traloi.length;i++){
+               if(traloi[i].dung === ''){
+                   noanswers.push(traloi[i])
+               }else if(traloi[i].dung === 'dung'){
+                   corrects.push(traloi[i])
+               }else {
+                   incorrects.push(traloi[i])
                }
-
-               await doRequest({
-                correct:corrects.length,
-                incorrect:incorrects.length,
-                noanswer:noanswers.length,
-                examId: exams.id
-            })
-              
-               
             }
-
-            
+            await doRequest({
+             correct:corrects.length,
+             incorrect:incorrects.length,
+             noanswer:noanswers.length,
+             examId: exams.id
+         }) 
+        } else if(x < part1.question.length - 1){
+            if(checked){
+                setChecked("")
+            }
+            setvalue(z)
+             setnext('block')
+             setgiaithich('')
+             setdich('')
+             setshowdiv('none')
+             setdung('')
+             Router.push(`/exam/${exams.id}`)
+             
+            a.push({dung,skills: part1.question[value].skills, question: part1.question[value].id})
+            settraloi(a)
+            console.log(traloi)
+        
+          
+           
+        }
             
     }
     
@@ -312,9 +329,22 @@ function dapan(x){
         <div>
          <div>Time left to exam: {timeLeft}:{secondsLeft} seconds</div>
            {part1.question[value].imageUrl && ( <img src={part1.question[value].imageUrl} alt={part1.question[value].imageUrl} style={{width:350,height:350}} />)}
-           
+           {currentUser && currentUser.role ===1  &&(<div>
+                        <Image  questionId={part1.question[value].id} examId={exams.id} />
+                   </div>)}
             <div style={{color: 'red'}}>{dung}</div>
-            <div>{part1.question[value].title}:{part1.question[value].description}</div>
+            <div>{part1.question[value].title}:{part1.question[value].description}
+            {currentUser&&currentUser.role===1&&(
+                        <>
+                            &nbsp;
+                             <button className="btn btn-primary" onClick={()=> Router.push(`/admin/question/updateQuestion/[questionId]`, `/admin/question/updateQuestion/${part1.question[value].id}`)}>Update</button>
+                            &nbsp;
+                                <button className="btn btn-danger" onClick={()=> Router.push(`/admin/question/deleteQuestion/[questionId]`, `/admin/question/deleteQuestion/${part1.question[value].id}`)}>Delete</button>
+                        </>
+                    )}
+                     
+            
+            </div>
             <form>
         <label className="container">{part1.question[value].A}
           <input checked={checked === part1.question[value].A} onClick={(x)=>{setChecked(x.target.value)}} onChange={()=>{dapan(part1.question[value].A)}} value={part1.question[value].A} type="radio" name="radio"/>
@@ -341,14 +371,22 @@ function dapan(x){
                    />
                </audio>
            )}
+          
       </form>
      
       <div style={{display:`${showdiv}`}}>
         <p>y nghia: {giaithich}</p>
 <p>dich:{dich}</p>
       </div>
-      <button className='next' onClick={()=>{newa(value)}}style={{display:`${next}`}}>next</button>
+      <button className='btn btn-primary' onClick={()=>{newa(value)}}style={{display:`${next}`}}>next</button>
+      { currentUser && currentUser.role ===1 &&(<div>
+                        <Audio  questionId={part1.question[value].id} examId={exams.id} />
+                   </div>)}
        {errors}
+       <div>
+       {currentUser && currentUser.role === 1&&(<button onClick={()=>Router.push('/admin/question/[questionId]',`/admin/question/${part1.id}`)} className="btn btn-primary">Add Question</button>)}
+
+       </div>
 
         </div>
        

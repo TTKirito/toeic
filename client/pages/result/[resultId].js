@@ -1,3 +1,4 @@
+import  Router  from "next/router"
 
 
 const ResultId =({results})=>{
@@ -7,6 +8,7 @@ const ResultId =({results})=>{
             <h4>correct: {results.correct}</h4>
             <h4>incorrect: {results.incorrect}</h4>
             <h4>no answer: {results.noanswer}</h4>
+            <button className ="btn btn-primary" onClick={()=> Router.push('/auth/current-user')}>Acount</button>
         </div>
     )
 }

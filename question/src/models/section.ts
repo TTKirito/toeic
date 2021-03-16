@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { Part } from './part';
 
 interface SectionAttrs {
   title: string;
@@ -48,9 +49,19 @@ sectionSchema.virtual('part', {
   foreignField: 'section'
 })
 
+
 sectionSchema.statics.build = (attrs: SectionAttrs) => {
   return new Section(attrs);
 };
+
+sectionSchema.pre('remove',async function ( next){
+  const section = this;
+
+  await Part.deleteMany({section: section.id})
+  next()
+  
+})
+
 
 const Section = mongoose.model<SectionDoc, SectionModel>('Section', sectionSchema);
 

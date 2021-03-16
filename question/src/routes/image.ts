@@ -43,7 +43,7 @@ validateRequest, async (req: Request, res: Response) =>{
 })
 router.get('/api/image', async (req: Request, res: Response) =>{
     const image = await Image.find({}).populate('question')
-
+    
 
     res.send(image)
 })
@@ -54,8 +54,26 @@ router.get('/api/image/:id', async (req: Request, res: Response) =>{
 })
 
 router.delete('/api/image/:id',requireAuth,isAdmin, async (req: Request, res: Response) =>{
-    const image = await Image.findByIdAndDelete(req.params.id).populate('question')
+    const image = await Image.findById(req.params.id).populate('question')
+    
+    if(!image){
+        throw new NotFoundError()
+    }
+
+    const question = await Question.findById(image?.question.id)
+
+    if(!question){
+        throw new NotFoundError()
+    }
+
+    question.set({
+        imageUrl: undefined
+    })
+
+    await question.save()
+    
     res.set('Content-Type','image/png')
+    await image.remove()
     res.send(image?.image)
 })
 

@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { Audio } from './audio';
+import { Image } from './image';
 import { PartDoc } from './part';
 import { Part1Doc } from './part1';
 import { SectionDoc } from './section';
@@ -126,7 +128,11 @@ const questionSchema = new mongoose.Schema(
 );
 questionSchema.set('versionKey', 'version');
 questionSchema.plugin(updateIfCurrentPlugin);
-
+questionSchema.pre('remove', async function (next){
+    await Image.deleteMany({question: this.id})
+    await Audio.deleteMany({question: this.id})
+    next()
+})
 
 
 questionSchema.virtual('image',{

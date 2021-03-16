@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { Part } from './part';
 
 interface SkillsAttrs {
   title: string;
@@ -46,6 +47,11 @@ skillsSchema.virtual('part', {
     ref: 'Part',
     localField: '_id',
     foreignField: 'skills'
+})
+
+skillsSchema.pre('remove', async function(next){
+  await Part.deleteMany({skills: this.id})
+  next()
 })
 
 

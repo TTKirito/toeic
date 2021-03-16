@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
+import { Part1 } from './part1';
 import { SectionDoc } from './section';
 import { SkillsDoc } from './skill';
 
@@ -72,7 +73,11 @@ partSchema.virtual('part1',{
     foreignField: 'part'
 })
 
-
+partSchema.pre('remove', async function (next){
+  const part1 = this
+  await Part1.deleteMany({part: part1.id})
+  next()
+})
 partSchema.statics.build = (attrs: PartAttrs) => {
   return new Part(attrs);
 };

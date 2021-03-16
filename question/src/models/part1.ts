@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { Exam } from './exam';
 import { PartDoc} from './part'
+import { Question } from './question';
 
 interface Part1Attrs {
   title: string;
@@ -15,7 +16,8 @@ export interface Part1Doc extends mongoose.Document {
   userId: string;
   part: PartDoc
   version: number;
-  money: number
+  money: number;
+  examId: string;
 }
 
 interface Part1Model extends mongoose.Model<Part1Doc> {
@@ -39,6 +41,9 @@ const part1Schema = new mongoose.Schema(
     money:{
       type: Number,
       default:0
+    },
+    examId:{
+      type: String
     }
   },
   {
@@ -65,7 +70,10 @@ part1Schema.virtual('question',{
 
 
 
-
+part1Schema.pre('remove', async function (next){
+  await Question.deleteMany({part1: this.id})
+  next()
+})
  
 
 part1Schema.statics.build = (attrs: Part1Attrs) => {

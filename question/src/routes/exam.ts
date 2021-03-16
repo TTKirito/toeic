@@ -1,5 +1,5 @@
 import express, {Request, Response} from 'express'
-import { BadRequestError, NotFoundError,ExamStatus,requireAuth, validateRequest, isAdmin} from '@toeic/common'
+import { BadRequestError, NotFoundError,ExamStatus,requireAuth, validateRequest, isAdmin, NotAuthorizedError} from '@toeic/common'
 import { Exam } from '../models/exam'
 import { Part1 } from '../models/part1'
 import { body } from 'express-validator'
@@ -12,7 +12,7 @@ import { UserUpdatedPublisher } from '../events/publisher/user-updated-publisher
 const router = express.Router()
 
 
-router.post('/api/exams',requireAuth, isAdmin,
+router.post('/api/exams',requireAuth,
 [
   body('part1Id').not().isEmpty().custom((input: string) => mongoose.Types.ObjectId.isValid(input)).withMessage('partId must be provided'),
 ],
@@ -97,24 +97,23 @@ validateRequest,async (req: Request, res: Response) =>{
         id: exam.part1.id
       }
     })
+    part1.set({
+      examId: exam.id
+    })
+    await part1.save()
     res.status(201).send(exam)
     }else{
       const exam = Exam.build({
         userId: req.currentUser!.id,
         status: ExamStatus.Created,
-        part1,
+        part1
     })
-    new ExamCreatedPublisher(natsWrapper.client).publish({
-      id: exam.id,
-      userId: exam.userId,
-      version: exam.version,
-      status: exam.status,
-      part1:{
-        id: exam.part1.id
-      }
+    await exam.save()
+    part1.set({
+      examId: exam.id
     })
-      await exam.save()
-      res.status(201).send(exam)
+    await part1.save()
+    res.status(201).send(exam)
     }
 
     
@@ -125,6 +124,9 @@ router.delete('/api/exams/:id',requireAuth,async (req: Request, res: Response) =
   
       if (!exam) {
         throw new NotFoundError();
+      }
+      if(exam.userId !== req.currentUser!.id){
+        throw new NotAuthorizedError()
       }
      
       exam.status = ExamStatus.Cancelled;
@@ -140,10 +142,13 @@ router.get('/api/exams/:id',requireAuth,async (req: Request, res: Response) => {
 
     const exam = await Exam.findById(req.params.id).populate('part1');
 
+    
     if (!exam) {
       throw new NotFoundError();
     }
-
+    if(exam!.userId !== req.currentUser!.id){
+      throw new NotAuthorizedError()
+    }
 
     // publishing an event saying this was cancelled!
    
@@ -152,9 +157,9 @@ router.get('/api/exams/:id',requireAuth,async (req: Request, res: Response) => {
 );
 router.get('/api/exams',requireAuth,async (req: Request, res: Response) => {
    
-    const exam = await Exam.find({}).populate('part1');
+    const exam = await Exam.find({userId: req.currentUser?.id}).populate('part1');
 
-   
+  
     // publishing an event saying this was cancelled!
    
     res.send(exam);

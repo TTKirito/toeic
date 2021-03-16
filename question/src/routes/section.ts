@@ -20,6 +20,25 @@ router.post('/api/section',requireAuth,isAdmin,
     await section.save()
     res.status(201).send(section)
 })
+
+router.patch('/api/section/:id',requireAuth,isAdmin,
+[
+    body('title').not().isEmpty().withMessage('title is required')
+],validateRequest,async (req: Request, res: Response) =>{
+    const { title } = req.body
+
+   const section = await Section.findById(req.params.id)
+   if(!section){
+       throw new NotFoundError()
+   }
+
+   section.set({
+       title
+   })
+
+   await section.save()
+    res.send(section)
+})
 router.get('/api/section', async (req: Request, res: Response) =>{
     const section = await Section.find({}).populate('part')
     res.send(section)
@@ -34,10 +53,12 @@ router.get('/api/section/:id', async (req: Request, res: Response) =>{
 })
 
 router.delete('/api/section/:id',requireAuth,isAdmin, async (req: Request, res: Response) =>{
-    const section = await Section.findByIdAndDelete(req.params.id).populate('part')
+    const section = await Section.findById(req.params.id).populate('part')
     if(!section){
         throw new NotFoundError()
     }
+
+    await section.remove()
   
     res.send(section)
 })
