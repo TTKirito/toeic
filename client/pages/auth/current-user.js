@@ -72,7 +72,6 @@ const currentuser = ({currentUser,pays,submit,users}) => {
     )
 }
 currentuser.getInitialProps = async (context,client) =>{
-    console.log('ha')
     const { data:pays } = await client.get('/api/users/pay')
    const {data: submit} = await client.get('/api/submit')
    const {data: users} = await client.get('/api/users/allUser')
