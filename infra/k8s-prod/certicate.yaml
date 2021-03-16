@@ -5,8 +5,7 @@ metadata:
 spec:
   secretName: cert-secret
   issuerRef:
-    # The issuer created previously
     name: cert-issuer
-    kink: Issuer
+    kind: Issuer
   dnsNames:
-    - kwangsu.tk 
+    - kwangsu.tk
