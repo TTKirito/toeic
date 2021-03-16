@@ -15,6 +15,7 @@ const start = async () => {
     }
 
     try {
+        console.log('dev')
         await natsWrapper.connect(
             process.env.NATS_CLUSTER_ID,
             process.env.NATS_CLIENT_ID,
