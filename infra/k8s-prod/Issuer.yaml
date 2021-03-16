@@ -12,7 +12,7 @@ spec:
     - dns01:
         cloudDNS:
           # The ID of the GCP project
-          project: stoked-champion-306202
+          project: ticket-297601
           # This is the secret used to access the service account
           serviceAccountSecretRef:
             name: clouddns-dns01-solver-svc-acct
