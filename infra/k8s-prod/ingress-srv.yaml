@@ -7,9 +7,11 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: 'true'
     nginx.ingress.kubernetes.io/proxy-body-size: '1g'
     kubernetes.io/ingress.allow-http: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    networking.gke.io/managed-certificates: certificatethuongtonnet
 spec:
   rules:
-    - host: ticketing.dev
+    - host: kwangsu.tk
       http:
         paths:
           - path: /api/user/?(.*)
@@ -24,4 +26,7 @@ spec:
             backend:
               serviceName: client-srv
               servicePort: 3000
-          
+  tls:
+    - hosts:
+        - kwangsu.tk
+      secretName: cert-secret

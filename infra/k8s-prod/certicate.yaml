@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: cert
+spec:
+  secretName: cert-secret
+  issuerRef:
+    # The issuer created previously
+    name: cert-issuer
+    kink: Issuer
+  dnsNames:
+    - kwangsu.tk 
